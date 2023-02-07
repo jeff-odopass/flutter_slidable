@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_slidable/src/auto_close_behavior.dart';
-import 'package:flutter_slidable/src/notifications_old.dart';
 
 import 'action_pane_configuration.dart';
 import 'controller.dart';
@@ -27,6 +27,7 @@ class Slidable extends StatefulWidget {
     this.direction = Axis.horizontal,
     this.dragStartBehavior = DragStartBehavior.down,
     this.useTextDirection = true,
+    this.onActionPaneDrag,
     required this.child,
   }) : super(key: key);
 
@@ -96,6 +97,9 @@ class Slidable extends StatefulWidget {
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
 
+  /// A callback to be notified when an action pane is being dragged
+  final void Function(ActionPaneType)? onActionPaneDrag;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -115,15 +119,13 @@ class Slidable extends StatefulWidget {
   /// ```
   /// {@end-tool}
   static SlidableController? of(BuildContext context) {
-    final scope = context
-        .getElementForInheritedWidgetOfExactType<_SlidableControllerScope>()
-        ?.widget as _SlidableControllerScope?;
+    final scope = context.getElementForInheritedWidgetOfExactType<_SlidableControllerScope>()?.widget
+        as _SlidableControllerScope?;
     return scope?.controller;
   }
 }
 
-class _SlidableState extends State<Slidable>
-    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+class _SlidableState extends State<Slidable> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late final SlidableController controller;
   late Animation<Offset> moveAnimation;
   late bool keepPanesOrder;
@@ -134,8 +136,8 @@ class _SlidableState extends State<Slidable>
   @override
   void initState() {
     super.initState();
-    controller = SlidableController(this)
-      ..actionPaneType.addListener(handleActionPanelTypeChanged);
+    controller = SlidableController(this)..actionPaneType.addListener(handleActionPanelTypeChanged);
+    controller.actionPaneType.addListener(handleOnActionPaneDrag);
   }
 
   @override
@@ -156,6 +158,7 @@ class _SlidableState extends State<Slidable>
   @override
   void dispose() {
     controller.actionPaneType.removeListener(handleActionPanelTypeChanged);
+    controller.actionPaneType.removeListener(handleOnActionPaneDrag);
     controller.dispose();
     super.dispose();
   }
@@ -172,15 +175,18 @@ class _SlidableState extends State<Slidable>
 
   void updateIsLeftToRight() {
     final textDirection = Directionality.of(context);
-    controller.isLeftToRight = widget.direction == Axis.vertical ||
-        !widget.useTextDirection ||
-        textDirection == TextDirection.ltr;
+    controller.isLeftToRight =
+        widget.direction == Axis.vertical || !widget.useTextDirection || textDirection == TextDirection.ltr;
   }
 
   void handleActionPanelTypeChanged() {
     setState(() {
       updateMoveAnimation();
     });
+  }
+
+  void handleOnActionPaneDrag() {
+    widget.onActionPaneDrag?.call(controller.actionPaneType.value);
   }
 
   void handleDismissing() {
@@ -194,9 +200,7 @@ class _SlidableState extends State<Slidable>
     moveAnimation = controller.animation.drive(
       Tween<Offset>(
         begin: Offset.zero,
-        end: widget.direction == Axis.horizontal
-            ? Offset(end, 0)
-            : Offset(0, end),
+        end: widget.direction == Axis.horizontal ? Offset(end, 0) : Offset(0, end),
       ),
     );
   }
@@ -258,8 +262,8 @@ class _SlidableState extends State<Slidable>
       controller: controller,
       direction: widget.direction,
       dragStartBehavior: widget.dragStartBehavior,
-      child: SlidableNotificationSender(
-        tag: widget.groupTag,
+      child: SlidableAutoCloseNotificationSender(
+        groupTag: widget.groupTag,
         controller: controller,
         child: SlidableScrollingBehavior(
           controller: controller,
@@ -270,8 +274,7 @@ class _SlidableState extends State<Slidable>
             child: ActionPaneConfiguration(
               alignment: actionPaneAlignment,
               direction: widget.direction,
-              isStartActionPane:
-                  controller.actionPaneType.value == ActionPaneType.start,
+              isStartActionPane: controller.actionPaneType.value == ActionPaneType.start,
               child: _SlidableControllerScope(
                 controller: controller,
                 child: content,

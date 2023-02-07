@@ -1,3 +1,13 @@
+## 2.0.1
+### Changed
+* The icon property of the SlidableAction is not of type IconData anymore, now an Icon should be directly provided.
+### Added
+* A textStyle property can now be used with SlidableAction to customize the text of the button
+* A callback can now be registered to listen to ActionPane drag
+* Added pubspec.lock to .gitignore
+### Fixed
+* Deprecated attributes
+
 ## 2.0.0
 ### Changed
 * Minimum version of Flutter (3.0.0 now) and Dart (2.17.0 now).

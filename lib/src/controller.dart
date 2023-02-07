@@ -123,12 +123,10 @@ class SlidableController {
   bool isLeftToRight = true;
 
   /// Whether the positive action pane is enabled.
-  bool get enablePositiveActionPane =>
-      isLeftToRight ? enableStartActionPane : enableEndActionPane;
+  bool get enablePositiveActionPane => isLeftToRight ? enableStartActionPane : enableEndActionPane;
 
   /// Whether the negative action pane is enabled.
-  bool get enableNegativeActionPane =>
-      isLeftToRight ? enableEndActionPane : enableStartActionPane;
+  bool get enableNegativeActionPane => isLeftToRight ? enableEndActionPane : enableStartActionPane;
 
   /// The extent ratio of the start action pane.
   double get startActionPaneExtentRatio => _startActionPaneExtentRatio;
@@ -194,9 +192,7 @@ class SlidableController {
 
   bool _acceptRatio(double ratio) {
     return !_closing &&
-        (ratio == 0 ||
-            ((ratio > 0 && enablePositiveActionPane) ||
-                (ratio < 0 && enableNegativeActionPane)));
+        (ratio == 0 || ((ratio > 0 && enablePositiveActionPane) || (ratio < 0 && enableNegativeActionPane)));
   }
 
   /// The current ratio of the full size of the [Slidable] that is already

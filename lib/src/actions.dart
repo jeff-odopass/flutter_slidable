@@ -25,6 +25,7 @@ class CustomSlidableAction extends StatelessWidget {
     this.autoClose = _kAutoClose,
     this.borderRadius = BorderRadius.zero,
     this.padding,
+    this.textStyle,
     required this.onPressed,
     required this.child,
   })  : assert(flex > 0),
@@ -80,16 +81,18 @@ class CustomSlidableAction extends StatelessWidget {
   /// {@endtemplate}
   final EdgeInsets? padding;
 
+  /// {@template slidable.actions.textStyle}
+  /// The textStyle of the OutlinedButton
+  /// {@endtemplate}
+  final TextStyle? textStyle;
+
   /// Typically the action's icon or label.
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final effectiveForegroundColor = foregroundColor ??
-        (ThemeData.estimateBrightnessForColor(backgroundColor) ==
-                Brightness.light
-            ? Colors.black
-            : Colors.white);
+        (ThemeData.estimateBrightnessForColor(backgroundColor) == Brightness.light ? Colors.black : Colors.white);
 
     return Expanded(
       flex: flex,
@@ -99,8 +102,9 @@ class CustomSlidableAction extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             padding: padding,
             backgroundColor: backgroundColor,
-            primary: effectiveForegroundColor,
-            onSurface: effectiveForegroundColor,
+            foregroundColor: effectiveForegroundColor,
+            disabledForegroundColor: effectiveForegroundColor,
+            textStyle: textStyle,
             shape: RoundedRectangleBorder(
               borderRadius: borderRadius,
             ),
@@ -142,6 +146,7 @@ class SlidableAction extends StatelessWidget {
     this.label,
     this.borderRadius = BorderRadius.zero,
     this.padding,
+    this.textStyle,
   })  : assert(flex > 0),
         assert(icon != null || label != null),
         super(key: key);
@@ -162,7 +167,7 @@ class SlidableAction extends StatelessWidget {
   final SlidableActionCallback? onPressed;
 
   /// An icon to display above the [label].
-  final IconData? icon;
+  final Icon? icon;
 
   /// The space between [icon] and [label] if both set.
   ///
@@ -178,13 +183,16 @@ class SlidableAction extends StatelessWidget {
   /// Padding of the OutlinedButton
   final EdgeInsets? padding;
 
+  /// TextStyle to apply to the label
+  final TextStyle? textStyle;
+
   @override
   Widget build(BuildContext context) {
     final children = <Widget>[];
 
     if (icon != null) {
       children.add(
-        Icon(icon),
+        icon!,
       );
     }
 
@@ -224,6 +232,7 @@ class SlidableAction extends StatelessWidget {
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       flex: flex,
+      textStyle: textStyle,
       child: child,
     );
   }
